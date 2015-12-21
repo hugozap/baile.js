@@ -1,0 +1,23 @@
+{
+  "name": "choreo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "browser.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify -t brfs browser.js > bundle.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "brfs": "^1.4.1",
+    "dom-ready": "^1.0.6",
+    "domify": "^1.4.0",
+    "domready": "^1.0.8",
+    "insert-css": "^0.2.0",
+    "insert-html": "0.0.1",
+    "node-uuid": "^1.4.7",
+    "restyle": "^0.5.1",
+    "timeparse": "^1.0.0"
+  }
+}

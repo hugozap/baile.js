@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+	.container {
+		width:100vw;
+		height:100vh;
+		background-color: green;
+	}
+	.box{
+		background-color:black;
+		width: 100px;
+		height: 50px;
+		/*opacity: 0;*/
+		color:white;
+		border:solid 1px black;
+		overflow:hidden;
+		margin:10px;
+	}
+	.active{
+		opacity: 1;
+		animation: tomalas 3000ms ease-in forwards;
+
+	}
+	
+	@keyframes fade-out{
+		0% {
+			opacity:1;
+		}
+		100% {
+			opacity:0;
+		}
+	}
+
+	@keyframes fade-in{
+		0% {
+			opacity:0;
+		}
+		100% {
+			opacity:1;
+		}
+	}
+
+	@keyframes fontanim{
+		0% {
+		   font-size: 10px;
+		 }
+		 30% {
+		   font-size: 15px;
+		 }
+		 100% {
+		   font-size: 10px;
+		 }
+	}
+	@keyframes tomalas {
+		0% {
+			 opacity: 0;
+			 /*width:0%;*/
+			 margin-bottom: 0;
+			 transform: rotateY(0deg);
+		}
+		70% {
+			'opacity':0.9;
+			 /*width:95%;*/
+			 margin-bottom: 40px;
+			 transform: rotateY(10deg);
+		}
+		90% {
+			'opacity':0.9;
+			 /*width:85%;*/
+			 margin-bottom: 20px;
+			 transform: rotateY(90deg);
+
+		}
+		100% {
+			'opacity':1;
+			 /*width:0%;*/
+			 margin-bottom: 0px;
+			 transform: rotateY(0deg);
+
+		}
+	}
+
+	@keyframes pulse{
+		0% {
+		   transform: scale(1);
+		 }
+		 30% {
+		   transform: scale(1.5);
+		 }
+		 100% {
+		   transform: scale(1);
+		 }
+	}
+
+	@keyframes border{
+		0% {
+		   stroke-dashoffset: 0%;
+		 }
+
+		 100% {
+		    stroke-dashoffset: 100%;
+		 }
+
+
+	}
+
+	@keyframes move{
+		0% {
+		   transform: translateX(0) rotateY(0deg);
+		 }
+
+		 100% {
+		   transform:  translateX(calc(50vw - 100%)) rotateY(360deg);
+		 }
+	}
+
+	@keyframes rotateLeft{
+		0% {
+		   transform: rotateZ(0deg);
+		 }
+
+		 100% {
+		   transform: rotateZ(-90deg);
+		 }
+	}
+
+
+	@keyframes ripple{
+		0% {
+		   transform: scale(1);
+		   opacity:1;
+		 }
+
+		 50% {
+		    transform: scale(5);
+		   	opacity:0.5;
+
+		  }
+
+		 70% {
+		    transform: scale(10);
+		   	opacity:0.3;
+		    
+
+		  }
+
+		 100% {
+		   transform: scale(8);
+		   opacity:0;
+
+		 }
+	}
+
+	.ship{
+		width:50vw;
+		height:50vh;
+		position:absolute;
+		top:0;
+		right:0;
+	}
+
+	.ship svg{
+		width:100%;
+		height:100%;
+	}
+
+	.smoke path{
+		stroke-dasharray: 1500;
+	}
+	</style>
+</head>
+<body>
+
+	<div class="ship"></div>
+	<div class="container">
+		<div class="box">cha cha cha</div>
+		<div class="box">Hop</div>
+		<div class="box">Bboy</div>
+		<div class="box">Anita</div>
+		<div class="box">Lil Amok</div>
+		<div class="box">RubberLegz</div>
+		<div class="box">Bboy Marcio</div>
+		<div class="box">Rayden</div>
+	</div>
+	
+	<link rel="stylesheet" href="animate.css">
+	<script src="bundle.js"></script>
+
+</body>
+</html>
