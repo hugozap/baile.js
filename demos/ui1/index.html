@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Choreia Demo Animated SVG</title>
+	<link rel="stylesheet" href="../animate.css">
+	<script src="../../dist/choreia.js"></script>
+	<style>
+		.container{
+			width: 300px;
+			height: 300px;
+			background-color: #89F070;
+			color: rgba(0, 0, 0, 0.7);
+			text-align: center;
+			overflow: hidden;
+			position: relative;
+		}
+
+		.container>* {
+			width: 100%;
+			height: 100%;
+			background-color: #F0EA37;
+			position: absolute;
+			top: 0;
+			left: 0;
+			padding: 0;
+			margin: 0;
+			font-size: 30px;
+		}
+
+		.hidden {
+			transform: translate(-100vw,0);
+		}
+
+		.end{
+			width: 100%;
+			height: 100%;
+		}
+
+		.end .ship {
+			width: 50px;
+		}
+
+		.m3 {
+			bottom: 0;
+			background-color: #70F384;
+		}
+
+		.note {
+			font-size: 11px;
+			color:#454F8F;
+			position: fixed;
+			bottom: 0;
+		}
+	</style>
+</head>
+<body>
+
+	<div class="container">
+		<div class="cat-message hidden">
+			<h4>Hello</h4>
+			<img src="cat.svg" alt="">
+		</div>
+		<div class="dog-message hidden">
+			<h4>You are great!</h4>
+			<img src="dog.svg" alt="">
+
+		</div>
+		<div class="ox-message hidden">
+			Ready for something cool?
+			<img class="ox" src="ox.svg" alt="">
+
+		</div>
+		<div class="end hidden">
+			<h4 class="title hidden">Wow a Dragon!</h4>
+			<img class="dragon hidden" src="dragon.svg" alt="">
+		</div>
+	</div>
+
+	<p class="note">
+		Icons Credits
+		Gentleman Cat by Arancha R from the Noun Project
+		Dog by Alexander Wamhoff from the Noun Project	
+		dragon by Aha-Soft from the Noun Project
+		ox by MaJo Ox from the Noun Project
+	</p>
+	<script>
+	document.addEventListener("click", function(event) {
+	    new Choreia()
+	    .select('.cat-message')
+	    .play('slideInLeft', '1500ms', 'ease')
+	    .wait()
+	    .play('slideOutLeft', '1000ms', 'ease')
+	    .select('.dog-message')
+	    .play('slideInRight', '1000ms', 'ease')
+	    .wait()
+	    .play('slideOutRight', '1000ms', 'ease')
+	    .select('.ox-message')
+	    .play('rotateIn', '1500ms', 'ease')
+	    .wait()
+	    .select('.ox')
+	    .play('rubberBand', '1000ms', 'ease')
+	    .wait()
+	    .select('.end')
+	    .play('slideInUp', '1000ms', 'ease')
+	    .wait()
+	    .select('.end .dragon')
+	    .play('bounceInDown', '2000ms', 'ease')
+	    .wait()
+	    .select('.end .title')
+	    .play('slideInUp', '1000ms', 'ease')
+	    .start()
+
+	  });
+		
+
+	</script>
+</body>
+</html>

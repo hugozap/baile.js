@@ -20,6 +20,12 @@ s.select('.box')
 .wait()
 .playCascade('ripple', '400ms', 'ease-in')
 
+var s1 = new Scene();
+s1.select('.box')
+.playCascade('ripple', '1s', 'cubic-bezier(0.200, 1.305, 0.775, -0.415)')
+.wait()
+.play('wobble', '300ms', 'ease-in')
+
 
 var s2 = new Scene()
 s2
@@ -44,7 +50,7 @@ s2
 domReady(function(){
 	document.querySelector('.ship').appendChild(svgDom)
 	setTimeout(function(){
-		s.start();
+		s1.start();
 		s2.start()
 	});
 })
