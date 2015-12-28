@@ -1,6 +1,15 @@
 var test = require('tape')
 var Choreia = require('../index.js')
 
+test('Select works with jquery wrapped object', function(t){
+
+})
+
+
+test('Select works with DomList object', function(t){
+
+})
+
 test('Play plays animation', function(t){
 	var elem = document.querySelector('#elem')
 	t.plan(1)

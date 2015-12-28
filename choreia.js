@@ -12,7 +12,7 @@ function Scene(){
 	}
 	this.groups = [];
 	this.currentGroupIndex = -1;
-	this.animations = [];
+	this.animationSteps = [];
 	return this;
 
 }
@@ -38,7 +38,7 @@ Scene.prototype = {
 
 		this._generateClass(step);
 
-		this.animations.push(step)
+		this.animationSteps.push(step)
 
 		return this;
 	},
@@ -57,7 +57,7 @@ Scene.prototype = {
 
 		this._generateClass(step)
 
-		this.animations.push(step)
+		this.animationSteps.push(step)
 
 		return this;
 
@@ -85,12 +85,11 @@ Scene.prototype = {
 
 		cssObj[cssClassName] = {'animation': cssRule, 'opacity': 1}
 		var css = restyle(cssObj)
-		console.log('Css rule:', css)
 
 	},
 
 	wait:function(cb){
-		this.animations.push({
+		this.animationSteps.push({
 			type:'wait',
 			cb: cb || new Function()
 		})
@@ -105,18 +104,18 @@ Scene.prototype = {
 		var self = this;
 		//1. set wait callbacks
 		console.log('Setting wait callbacks')
-		console.log(this.animations)
-		for(var i=0; i< this.animations.length ; i++){
-			var currentStep = this.animations[i];
+		console.log(this.animationSteps)
+		for(var i=0; i< this.animationSteps.length ; i++){
+			var currentStep = this.animationSteps[i];
 			var currentStepIndex = i;
 			if(currentStep.type === 'wait'){
 				console.log('Wait found')
 				//TODO: validar que exista una animacion previa
 				//TODO: soportar varios play antes de wait
-				var prev = this.animations[i-1];
+				var prev = this.animationSteps[i-1];
 				prev.nextStepIndex = i+1;
 				console.log('When previous callback runs, run:')
-				console.log(self.animations[prev.nextStepIndex])
+				console.log(self.animationSteps[prev.nextStepIndex])
 
 				prev.callback = function(){
 					console.log('animation callback called, running next step')
@@ -137,10 +136,10 @@ Scene.prototype = {
 	},
 
 	runStep:function(stepIndex){
-		if(stepIndex >= this.animations.length)
+		if(stepIndex >= this.animationSteps.length)
 			return;
 
-		var step = this.animations[stepIndex]
+		var step = this.animationSteps[stepIndex]
 		console.log('runStep called', stepIndex)
 		console.log(step)
 
@@ -152,7 +151,7 @@ Scene.prototype = {
 			return;
 
 		console.log('running step:', stepIndex);
-		console.log(this.animations[stepIndex]);
+		console.log(this.animationSteps[stepIndex]);
 
 		//TODO: Aquí aplicar la animación
 		
@@ -202,8 +201,17 @@ Scene.prototype = {
 	},
 
 	_getTargetElements : function( group ) {
-		//TODO: support DOM node
-		return  Array.prototype.slice.call( document.querySelectorAll( group ), 0 )
+		
+		if( typeof group === 'string'){
+			//String DOM selector
+			return  Array.prototype.slice.call( document.querySelectorAll( group ), 0 )
+		} else if ( group instanceof jQuery) {
+			//Is a jquery wrapped element?
+			return Array.prototype.slice.call(group)
+		} else if (group instanceof NodeList) {
+			//Node list (from document.querySelectorAll)
+			return Array.prototype.slice.call(group)
+		}
 	}
 }
 if(window){
