@@ -5,6 +5,7 @@ var insertCss = require('insert-css')
 var timeparse = require('timeparse')
 
 var util = require('util')
+module.exports = Scene
 
 function Scene(){
 	if(!(this instanceof Scene)){
@@ -211,10 +212,12 @@ Scene.prototype = {
 		} else if (group instanceof NodeList) {
 			//Node list (from document.querySelectorAll)
 			return Array.prototype.slice.call(group)
+		} else if( group instanceof Node) {
+			//It's just one element return it wrapped as array
+			return [group]
 		}
 	}
 }
 if(window){
 	window.Choreia = Scene
 }
-module.exports = Scene

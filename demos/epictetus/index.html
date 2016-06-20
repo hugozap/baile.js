@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Choreia Demo Animated SVG</title>
+	<link rel="stylesheet" href="../animate.css">
+	<script src="../../dist/choreia.js"></script>
+	<style>
+		body{
+			width: 100vw;
+			height: 100vh;
+		}
+		.container{
+			width: 500px;
+			height: 500px;
+			background-color: #fff;
+			color: rgba(0, 0, 0, 0.7);
+			text-align: center;
+			overflow: hidden;
+			position: relative;
+			margin: auto;
+		}
+
+
+		.hidden {
+			transform: translate(-100vw,0);
+		}
+		
+		.thumbnail {
+			width: 80px;
+			height: 80px;
+			display: inline-block;
+		}
+
+		
+		.thumbnail .quote {
+			display: none;
+		}
+
+		.thumbnail img {
+			width: 100%;
+		}
+
+		.active {
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+
+		.active img{
+			opacity: 0.3;
+			position: absolute;
+			top: 50%;
+			left: 0;
+		}
+
+		.active .quote {
+			position: absolute;
+			top: 10%;
+			left: 10%;
+			padding: 5px;
+			display: block;
+			font-size: 25px;
+		}
+
+		.back {
+			background: #fff;
+			border: solid 1px #2E2824;
+			padding: 5px;
+			position: absolute;
+			bottom: 0;
+			right: 0;
+		}
+
+		@keyframes expand{
+			0%{
+				width: 60px;
+				height: 60px;
+				opacity: 0;
+				transform: translate(-100vw,0);
+
+			}
+			 100% {
+			    width: 100%;
+			    height: 100%;
+			    opacity: 1;
+				transform: translate(0,0);
+			 }
+
+
+		}
+
+		@keyframes collapse{
+
+			0% {
+			    width: 100%;
+			    height: 100%;
+			    opacity: 1;
+				transform: translate(0,0);
+			 }
+
+			100%{
+				width: 60px;
+				height: 60px;
+				opacity: 0;
+				transform: translate(-100vw,0);
+
+			}
+			 
+
+
+		}
+
+	</style>
+</head>
+<body>
+
+	<div class="container">
+		<div class="hidden thumbnail">
+			<p class="quote">
+			“If anyone tells you that a certain person speaks ill of you, do not make excuses about what is said of you but answer, "He was ignorant of my other faults, else he would not have mentioned these alone.” 
+			</p>
+			<img src="noun_91124_cc.svg" alt="">
+		</div>
+		<div class="hidden thumbnail">
+			<p class="quote">
+			There is only one way to happiness and that is to cease worrying about things which are beyond the power or our will.
+			</p>
+			<img src="noun_91124_cc.svg" alt="">
+		</div>
+		<div class="hidden thumbnail">
+			<p class="quote">
+			Man is not worried by real problems so much as by his imagined anxieties about real problems
+			</p>
+			<img src="noun_91124_cc.svg" alt="">
+		</div>
+		<div class="hidden thumbnail">
+			<p class="quote">
+			The key is to keep company only with people who uplift you, whose presence calls forth your best.
+			</p>
+			<img src="noun_91124_cc.svg" alt="">
+		</div>
+		<div class="hidden thumbnail">
+			<p class="quote">
+			It's not what happens to you, but how you react to it that matters
+			</p>
+			<img src="noun_91124_cc.svg" alt="">
+		</div>
+		<div class="hidden thumbnail">
+			<p class="quote">
+			Any person capable of angering you becomes your master; he can anger you only when you permit yourself to be disturbed by him.</p>
+			<img src="noun_91124_cc.svg" alt="">
+		</div>
+		<div class="hidden thumbnail">
+			<p class="quote">
+			Other people's views and troubles can be contagious. Don't sabotage yourself by unwittingly adopting negative, unproductive attitudes through your associations with others.</p>
+			<img src="noun_91124_cc.svg" alt="">
+		</div>
+		<div class="hidden thumbnail">
+			<p class="quote">
+			To accuse others for one's own misfortune is a sign of want of education. To accuse oneself shows that one's education has begun. To accuse neither oneself nor others shows that one's education is complete.</p>
+			<img src="noun_91124_cc.svg" alt="">
+		</div><div class="hidden thumbnail">
+			<p class="quote">He is a wise man who does not grieve for the things which he has not, but rejoices for those which he has.
+			</p>
+			<img src="noun_91124_cc.svg" alt="">
+		</div>
+		<div class="back hidden">Go Back</div>
+
+	</div>
+
+	<p class="note">
+		Icons Credits
+		<ul>
+			<li>bliss by Jason Dilworth from the Noun Project</li>
+			
+		</ul>
+	</p>
+	<script>
+	document.addEventListener("DOMContentLoaded", function(event) {
+	    new Choreia()
+	    .select('.thumbnail')
+	    .playCascade('slideInLeft', '200ms', 'ease')
+	    .start()
+
+	    $('.container').on('click', '.thumbnail', function(ev){
+
+	    	//Remove current element active class
+	    	$('.active').removeClass('active')
+	    	//Add active class to current
+	    	$(this).addClass('active')
+	    	//Play expand animation
+	    	new Choreia()
+	    		//First animate exit elems
+	    		.select('.container>.thumbnail:not(.active)')
+	    		.play('fadeOutUp', '400ms', 'ease')
+	    		//Now animate active elem
+		    	.select(this)
+		    	.play('expand', '200ms', 'ease')
+		    	//Animate quote
+		    	.select(this.querySelector('.quote'))
+		    	.play('bounceInUp', '1000ms', 'ease')
+		    	.wait()
+		    	//Animate 'go back ' entrance
+		    	.select('.back')
+		    	.play('bounceInRight', '500ms', 'ease')
+		    	.start()
+
+
+
+	    })
+
+	    $('.back').on('click', function(ev){
+	    	$('.active').removeClass('active')
+	    	new Choreia()
+	    		.select(this)
+	    		.play('slideOutRight', '300ms', 'ease')
+	    		.select('.active')
+	    		.play('collapse', '400ms', 'ease')
+	    		.select($('.thumbnail'))
+	    		.play('fadeInUp', '400ms', 'ease')
+	    		.start()
+	    })
+
+	  });
+
+
+		
+
+	</script>
+	<script src="../jquery.js"></script>
+</body>
+</html>
