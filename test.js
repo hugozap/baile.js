@@ -9,13 +9,20 @@ window.$ = require('jquery')
 // correr con wzrd index
 function animate() {
 	console.log('will animate')
+	anim.reset()
 	anim.select('.item')
 		.play('wobble', '300ms', 'ease-in')
-		.clear()
+		.wait()
+		.play('bounce', '1000ms', 'ease-in')
 		.wait()
 		.select('.item2')
-		.play('wobble', '300ms', 'ease-in')
-		.clear()
+		.play('bounce', '1000ms', 'ease-in')
+		.wait()
+		.play('flipOutY', '300ms', 'ease-in')
+		.wait()
+		.play('flipInY', '300ms', 'ease-in')
+
+
 
 	anim.start()
 }

@@ -14,6 +14,7 @@ function Scene(){
 	this.groups = [];
 	this.currentGroupIndex = -1;
 	this.animationSteps = [];
+	this.cssClassStack = [];
 	return this;
 
 }
@@ -29,6 +30,7 @@ Scene.prototype = {
 	play:function(name, duration, easing){
 
 		var step = {
+			type:'play',
 			group: this.groups[this.currentGroupIndex],
 			'name': name,
 			'duration': duration,
@@ -47,6 +49,7 @@ Scene.prototype = {
 	playCascade:function(name, duration, easing){
 
 		var step = {
+			type:'playCascade',
 			'cascade': true,
 			'group': this.groups[this.currentGroupIndex],
 			'name': name,
@@ -63,7 +66,17 @@ Scene.prototype = {
 		return this;
 
 	},
-
+	reset: function() {
+		//reset elements
+		this.cssClassStack.forEach(function(cname) {
+			document.querySelectorAll('.'+cname).forEach(function(elem) {
+				elem.classList.remove(cname)
+			})
+		})
+		this.animationSteps = []
+		this.currentGroupIndex = -1
+		this.groups = []
+	},
 	_getMilliseconds: function(value) {
 		if (typeof value == 'number')
 			return value
@@ -86,6 +99,7 @@ Scene.prototype = {
 
 		cssObj[cssClassName] = {'animation': cssRule, 'opacity': 1}
 		var css = restyle(cssObj)
+		this.cssClassStack.push(className)
 
 	},
 
@@ -98,6 +112,14 @@ Scene.prototype = {
 		return this;
 
 	},
+	clear: function(cb) {
+		this.animationSteps.push({
+			type:'clear',
+			cb: cb || new Function()
+		})
+
+		return this;
+	},
 
 	start:function(){
 		//Create graph or state machine here
@@ -106,6 +128,14 @@ Scene.prototype = {
 		//1. set wait callbacks
 		console.log('Setting wait callbacks')
 		console.log(this.animationSteps)
+		this.setupWaitCalls()
+		this.runStep(0)
+
+		return this;
+	},
+
+	setupWaitCalls: function() {
+		var self = this;
 		for(var i=0; i< this.animationSteps.length ; i++){
 			var currentStep = this.animationSteps[i];
 			var currentStepIndex = i;
@@ -115,7 +145,6 @@ Scene.prototype = {
 				//TODO: soportar varios play antes de wait
 				var prev = this.animationSteps[i-1];
 				prev.nextStepIndex = i+1;
-				console.log('When previous callback runs, run:')
 				console.log(self.animationSteps[prev.nextStepIndex])
 
 				prev.callback = function(){
@@ -127,39 +156,45 @@ Scene.prototype = {
 					self.runStep(this.nextStepIndex);
 				}.bind(prev);
 			}
+			
 		}
-
-		this.runStep(0);
-
-		return this;
-
-
 	},
-
 	runStep:function(stepIndex){
 		if(stepIndex >= this.animationSteps.length)
 			return;
 
 		var step = this.animationSteps[stepIndex]
-		console.log('runStep called', stepIndex)
-		console.log(step)
-
 		var self = this;
 
 		//If a wait is found, exit, the previous
 		//step should have an attached callback that continues
 		if(step.type === 'wait')
-			return;
+		{
+			throw new Error('wait should be called after a play or playCascade method has been called')
+		}
 
-		console.log('running step:', stepIndex);
-		console.log(this.animationSteps[stepIndex]);
+		if (step.type === 'clear') {
+			var className = this.cssClassStack.shift()
+			console.log('clear', className)
+			var lastPlayStep  = this._getLastPlayStep(stepIndex);
+			if (!lastPlayStep) {
+				throw new Error('play or playCascade must be called before clear')
+			}
+			//Remove generated classes from elements
+			lastPlayStep.elems.forEach(function(elem) {
+				elem.classList.remove(className);
+			})
+			self.runStep(stepIndex + 1)
 
+			return
+		}
 		//TODO: Aquí aplicar la animación
 		
 		var animTime = step.durationms; //TODO: extraer tiempo de animación
 
 		//Aplicar la clase que contiene la animación.
 		var elems = this._getTargetElements(step.group)
+		step.elems = elems
 		if (step.cascade) {
 			var startTime = 0;
 			var cascadeDuration = elems.length * step.durationms
@@ -200,13 +235,25 @@ Scene.prototype = {
 
 		
 	},
+	_getLastPlayStep: function(index) {
+		//Given an index return the last action of type
+		//play or playCascade
+		while( index >= 0 ) {
+			if (this.animationSteps[index].type === 'play'
+				|| this.animationSteps[index].type === 'playCascade' ) {
+				return this.animationSteps[index]
+			}
+			index--
+		}
+		return null
+	},
 
 	_getTargetElements : function( group ) {
 		
 		if( typeof group === 'string'){
 			//String DOM selector
 			return  Array.prototype.slice.call( document.querySelectorAll( group ), 0 )
-		} else if ( group instanceof jQuery) {
+		} else if ( window.jQuery && group instanceof jQuery) {
 			//Is a jquery wrapped element?
 			return Array.prototype.slice.call(group)
 		} else if (group instanceof NodeList) {

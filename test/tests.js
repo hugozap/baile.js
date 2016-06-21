@@ -48,3 +48,7 @@ test('playCascade end callback is called', function(t) {
 test('play end callback is called', function(t) {
 
 })
+
+test('Clear removes class from elements', function(t) {
+	
+})
