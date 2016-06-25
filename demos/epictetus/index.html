@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Choreia Demo Animated SVG</title>
+	<title>Baile Demo Animated SVG</title>
 	<link rel="stylesheet" href="../animate.css">
-	<script src="../../dist/choreia.js"></script>
+	<script src="../../dist/baile.min.js"></script>
 	<style>
 		body{
 			width: 100vw;
@@ -178,7 +178,7 @@
 	</p>
 	<script>
 	document.addEventListener("DOMContentLoaded", function(event) {
-	    new Choreia()
+	    new Baile()
 	    .select('.thumbnail')
 	    .playCascade('slideInLeft', '200ms', 'ease')
 	    .start()
@@ -190,7 +190,7 @@
 	    	//Add active class to current
 	    	$(this).addClass('active')
 	    	//Play expand animation
-	    	new Choreia()
+	    	new Baile()
 	    		//First animate exit elems
 	    		.select('.container>.thumbnail:not(.active)')
 	    		.play('fadeOutUp', '400ms', 'ease')
@@ -212,7 +212,7 @@
 
 	    $('.back').on('click', function(ev){
 	    	$('.active').removeClass('active')
-	    	new Choreia()
+	    	new Baile()
 	    		.select(this)
 	    		.play('slideOutRight', '300ms', 'ease')
 	    		.select('.active')
@@ -223,9 +223,6 @@
 	    })
 
 	  });
-
-
-		
 
 	</script>
 	<script src="../jquery.js"></script>
