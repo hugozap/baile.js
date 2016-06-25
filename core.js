@@ -83,7 +83,7 @@ Scene.prototype = {
         var duration = step.durationms + 'ms'
         var ease = step.easing
         var direction = 'forwards'
-        var cssRule = util.format('%s %s %s %s', step.name, duration, ease, direction )
+        var cssRule = [step.name, duration, ease, direction].join(' ')
         var cssClassName = '.' + className
         var cssObj = {
         }
@@ -261,5 +261,5 @@ _getTargetElements : function( group ) {
 if(typeof exports === "object" && exports) {  
     module.exports = Scene;
 } else {
-    window.baile = Scene
+    window.Baile = Scene
 }

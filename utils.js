@@ -4,7 +4,7 @@ function getNewId() {
 }
 
 function stringToId (str) {
-	return replace(/\W/g,'_');
+	return str.replace(/\W/g,'_');
 }
 
 /* time parse methods from 

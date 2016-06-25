@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<title>Choreia Demo Animated SVG</title>
 	<link rel="stylesheet" href="../animate.css">
-	<script src="../../dist/choreia.js"></script>
+	<script src="../../dist/baile.js"></script>
 	<style>
 		.container{
 			width: 300px;
@@ -86,8 +86,8 @@
 	</p>
 	<script>
 	document.addEventListener("DOMContentLoaded", function(event) {
-	    new Choreia()
-	    .select('.cat-message')
+		
+		Baile().select('.cat-message')
 	    .play('slideInLeft', '1500ms', 'ease')
 	    .wait()
 	    .play('slideOutLeft', '1000ms', 'ease')
