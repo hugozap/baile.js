@@ -122,6 +122,7 @@ Scene.prototype = {
     this.animationSteps = []
     this.currentGroupIndex = -1
     this.groups = []
+    return this
   },
   _getMilliseconds: function (value) {
     if (typeof value == 'number')
@@ -233,12 +234,9 @@ Scene.prototype = {
     if (step.cascade) {
       var startTime = 0
       var cascadeDuration = elems.length * step.durationms
-      console.log('cascadeDuration ', cascadeDuration)
-      elems.forEach(function (elem) {
-        console.log('cascade startTime ', startTime)
 
+      elems.forEach(function (elem) {
         setTimeout(function () {
-          console.log('-> applying class to element in cascade')
           elem.classList.add(step.className)
         }.bind(this), startTime)
 

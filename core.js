@@ -62,6 +62,7 @@ Scene.prototype = {
     this.animationSteps = []
     this.currentGroupIndex = -1
     this.groups = []
+    return this
   },
   _getMilliseconds: function (value) {
     if (typeof value == 'number')
