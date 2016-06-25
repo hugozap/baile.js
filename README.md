@@ -13,12 +13,12 @@ A global variable called ```Baile```
 will be added.
 
 From node:
-
+```javascript
 npm install baile-js
 var Baile = require('baile-js')
 var scene = Baile()
 scene.select('.item').play('animation', '1s')
-
+```
 
 TODO:
 - tests
