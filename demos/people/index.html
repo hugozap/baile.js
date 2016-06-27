@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Choreia Demo Animated SVG</title>
+	<link rel="stylesheet" href="../animate.css">
+	<script src="../jquery.js"></script>
+	<script src="../../dist/baile.js"></script>
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			background-color: black;
+
+		}
+		.panel {
+			width:80vw;
+			margin:auto;
+		}
+
+		.panel button {
+			min-width:20%;
+			height: 100px;
+			display: inline-block;
+			font-size: 40px;
+		}
+		.persons {
+			width: 100vw;
+			height: 90vh;
+			background-color: #6FB6FF;
+		}
+
+		.persons ul {
+			margin: 0;
+			padding: 0;
+
+		}
+
+		.persons li {
+			font-size: 30px;
+			width:200px;
+			margin:10px;
+			padding: 20px;
+			background-color: #FFFFFB;
+			display: inline-block;
+		}
+	</style>
+</head>
+<body>
+	
+	<div class="container">
+		<div class="panel">
+			<button id="btn1">Males</button>
+			<button id="btn2">Females</button>
+			<button id="btn3">All</button>
+		</div>
+		<div class="persons">
+			<ul>
+				<li class="male">Hugo</li>
+				<li class="female">Diana</li>
+				<li class="male">Diego</li>
+				<li class="female">Andrea</li>
+				<li class="male">Carlos</li>
+				<li class="female">Natalia</li>
+				<li class="female">Jessica</li>
+			</ul>
+		</div>
+	</div>
+	<script>
+	$(function(){
+		$('#btn1').click(function(){
+			Baile()
+				.select('.male')
+				.play('bounce','0.5s')
+				.wait()
+				.playCascade('pulse','0.5s')
+				.wait()
+				.reset()
+				.start()
+		})
+
+		$('#btn2').click(function(){
+			Baile()
+				.select('.female')
+				.play('bounce','0.5s')
+				.wait()
+				.playCascade('rubberBand','0.5s')
+				.wait()
+				.reset()
+				.start()
+		})
+
+		$('#btn3').click(function(){
+			Baile()
+				.select('.male,.female')
+				.play('bounce','0.5s')
+				.wait()
+				.playCascade('rubberBand','0.5s')
+				.wait()
+				.reset()
+				.start()
+		})
+	})
+
+	</script>
+</body>
+</html>

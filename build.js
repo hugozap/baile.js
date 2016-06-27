@@ -17,5 +17,6 @@ var merged = `
 var mini = Uglify.minify(merged, {fromString: true}).code;
 
 fs.writeFileSync(path.join(__dirname,'dist','baile.js'), merged, 'utf8')
+fs.writeFileSync(path.join(__dirname,'test','baile.js'), merged, 'utf8')
 fs.writeFileSync(path.join(__dirname,'dist','baile.min.js'), mini, 'utf8')
 console.log('ok');

@@ -53,15 +53,13 @@ Scene.prototype = {
     return this
   },
   reset: function () {
-    // reset elements
-    this.cssClassStack.forEach(function (cname) {
-      document.querySelectorAll('.' + cname).forEach(function (elem) {
-        elem.classList.remove(cname)
-      })
-    })
-    this.animationSteps = []
-    this.currentGroupIndex = -1
-    this.groups = []
+    // resets all the elements state
+    var step = {
+      type: 'reset'
+
+    }
+    this.animationSteps.push(step)
+
     return this
   },
   _getMilliseconds: function (value) {
@@ -128,8 +126,9 @@ Scene.prototype = {
         prev.nextStepIndex = i + 1
 
         prev.callback = function () {
-          if (this.cb) {
-            this.cb()
+          //Run wait callback
+          if (currentStep.cb) {
+            currentStep.cb()
           }
           // Run next animation
           self.runStep(this.nextStepIndex)
@@ -162,6 +161,20 @@ Scene.prototype = {
       })
       self.runStep(stepIndex + 1)
 
+      return
+    }
+
+    if (step.type === 'reset') {
+
+      // reset elements
+      this.cssClassStack.forEach(function (cname) {
+        document.querySelectorAll('.' + cname).forEach(function (elem) {
+          elem.classList.remove(cname)
+        })
+      })
+      this.animationSteps = []
+      this.currentGroupIndex = -1
+      this.groups = []
       return
     }
     // TODO: Aquí aplicar la animación
