@@ -124,22 +124,24 @@ Scene.prototype = {
         // TODO: soportar varios play antes de wait
         var prev = this.animationSteps[i - 1]
         prev.nextStepIndex = i + 1
+        prev.callback = (function (waitStep) {
 
-        prev.callback = function () {
-          //Run wait callback
-          if (currentStep.cb) {
-            currentStep.cb()
+          return function() {
+            //Run wait callback
+            if (waitStep.cb) {
+              waitStep.cb()
+            }
+            // Run next animation
+            self.runStep(this.nextStepIndex)
           }
-          // Run next animation
-          self.runStep(this.nextStepIndex)
-        }.bind(prev)
+
+        })(currentStep)
       }
     }
   },
   runStep: function (stepIndex) {
     if (stepIndex >= this.animationSteps.length)
       return
-
     var step = this.animationSteps[stepIndex]
     var self = this
 
@@ -177,11 +179,8 @@ Scene.prototype = {
       this.groups = []
       return
     }
-    // TODO: Aquí aplicar la animación
 
-    var animTime = step.durationms; // TODO: extraer tiempo de animación
-
-    // Aplicar la clase que contiene la animación.
+    var animTime = step.durationms; 
     var elems = this._getTargetElements(step.group)
     step.elems = elems
     if (step.cascade) {
