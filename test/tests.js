@@ -2,6 +2,16 @@ var test = require('tape')
 var jsdom = require('jsdom')
 var jquery = require('fs').readFileSync(__dirname+'/jquery.js', 'utf8')
 var Baile = require('fs').readFileSync(__dirname + '/baile.js', 'utf8')
+var BaileObj = require('./baile.js')
+
+
+function createVirtualConsole() {
+	var virtualConsole = jsdom.createVirtualConsole();
+	virtualConsole.on("log", function (message) {
+	  console.log("console.log ->", message);
+	});
+	return virtualConsole;
+}
 
 
 test('JQuery wrapped object is supported', function(t){
@@ -22,7 +32,8 @@ test('JQuery wrapped object is supported', function(t){
 	    setTimeout(function(){
 	    	t.equals($('.elem')[0].classList.length, 2, 'class applied')
 	    },200)
-	  }
+	  },
+	  virtualConsole: createVirtualConsole()
 	});
 })
 
@@ -46,7 +57,9 @@ test('Select works with DomList object', function(t){
 	    setTimeout(function(){
 	    	t.equals($('.elem')[0].classList.length, 2, 'class applied')
 	    },200)
-	  }
+	  },
+	  virtualConsole: createVirtualConsole()
+
 	});
 })
 
@@ -70,9 +83,12 @@ test('select works with DOM node', function(t) {
 	    setTimeout(function(){
 	    	t.equals($('.elem')[0].classList.length, 2, 'class applied')
 	    },200)
-	  }
+	  },
+	  virtualConsole: createVirtualConsole()
+
 	});
 })
+
 
 test('wait executes callback', function(t){
 	t.plan(1)
@@ -93,17 +109,45 @@ test('wait executes callback', function(t){
 
 	    var b = Baile().select('.elem')
 	    	.play('testanim','1s')
-	    	.wait(function() {
+	    	.wait(function waitCallback() {
 	    		t.pass();
 	    	})
 	    	.start()
 
 	    setTimeout(function(){
 	    },200)
-	  }
+	  },
+	  virtualConsole: createVirtualConsole()
+
 	});
 })
 
+test('wait supports callback and delay', function(t) {
+	t.plan(1)
+	jsdom.env({
+	  html: `
+		<html>
+			<body>
+				<div class="elem"></div>
+			</body>
+		</html>
+	  `,
+	  src: [jquery, Baile],
+	  done: function (err, window) {
+	    var $ = window.$
+	    var document = window.document
+	    var Baile = window.Baile
+	    Baile().select('.elem')
+	    .play('someanim', '0.5s')
+	    .wait(function() {
+	    	t.equal(this.delay, 500)
+	    }, '0.5s')
+	    .start()
+	  },
+	  virtualConsole: createVirtualConsole()
+
+	});
+})
 
 test('wait executes after animation', function(t){
 	t.plan(2)
@@ -135,7 +179,9 @@ test('wait executes after animation', function(t){
 
 	    setTimeout(function(){
 	    },200)
-	  }
+	  },
+	  virtualConsole: createVirtualConsole()
+
 	});
 })
 
@@ -173,7 +219,9 @@ test('wait after playCascade waits for every element animation', function (t){
 
 	    setTimeout(function(){
 	    },200)
-	  }
+	  },
+	  virtualConsole: createVirtualConsole()
+
 	});
 })
 
@@ -213,7 +261,9 @@ test('Multiple wait callbacks get executed', function(t) {
 	    	t.ok(firstWaitExecuted, 'first wait executed')
 	    })
 	    .start()
-	  }
+	  },
+	  virtualConsole: createVirtualConsole()
+
 	});
 })
 

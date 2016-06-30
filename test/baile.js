@@ -83,7 +83,9 @@ Scene.prototype = {
       'name': stringToId(name),
       'duration': duration,
       'durationms': this._getMilliseconds(duration),
-      'easing': easing
+      'easing': easing,
+      onStartListeners: [],
+      onEndListeners: []
     // TODO: support optional parameters
     }
 
@@ -102,7 +104,9 @@ Scene.prototype = {
       'name': stringToId(name),
       'duration': duration,
       'durationms': this._getMilliseconds(duration),
-      'easing': easing
+      'easing': easing,
+      onStartListeners: [],
+      onEndListeners: []
     // TODO: support optional parameters
     }
 
@@ -147,12 +151,27 @@ Scene.prototype = {
     this.cssClassStack.push(className)
   },
 
-  wait: function (cb) {
-    this.animationSteps.push({
-      type: 'wait',
-      cb: cb || new Function()
-    })
+  /* cb[optional]: callback executed when the wait period is over
+     delay[optional]: if specified, executes the callback after the delay time
+     , by default delay === last step duration
+ */
+  wait: function (cb, delay) {
+    //only delay was set as argument
 
+    var delayms = null
+    if (['string','number'].indexOf(typeof cb) > -1) {
+      delayms = this._getMilliseconds(cb)
+    } else if (['string','number'].indexOf(typeof delay) > -1) {
+
+      delayms = this._getMilliseconds(delay)
+    }
+    var cb = typeof cb === 'function' ? cb:  new Function()
+    var step = {
+      type: 'wait',
+      cb: cb ,
+      delay: delayms
+    }
+    this.animationSteps.push(step)
     return this
   },
   clear: function (cb) {
@@ -184,18 +203,33 @@ Scene.prototype = {
         // TODO: soportar varios play antes de wait
         var prev = this.animationSteps[i - 1]
         prev.nextStepIndex = i + 1
-        prev.callback = (function (waitStep) {
-
+        /* If the wait step has a delay set, then 
+           we should not wait until the last step has
+           finished. We should instead wait delayms from the moment
+           the previous step starts
+        */
+        
+        //The callback called onstart or onend 
+        //for the previous step
+        var pcallback = (function (waitStep, prevStep) {
           return function() {
-            //Run wait callback
+            //Run wait user callback
             if (waitStep.cb) {
               waitStep.cb()
             }
             // Run next animation
-            self.runStep(this.nextStepIndex)
+            self.runStep(prevStep.nextStepIndex)
           }
 
-        })(currentStep)
+        })(currentStep, prev)
+
+        if (currentStep.delayms) {
+          //add to listeners executed on start
+          prev.onStartListeners.push(pcallback)
+        } else {
+          //add to listeners executed on end
+          prev.onEndListeners.push(pcallback)
+        }
       }
     }
   },
@@ -240,13 +274,21 @@ Scene.prototype = {
       return
     }
 
-    var animTime = step.durationms; 
+    //for play and playCascade steps:
+    
+    //Execute onStartListeners for the step
+    step.onStartListeners.forEach(function(startListener) {
+      setTimeout(function () {
+        startListener.bind(step)(step, stepIndex)
+      },0)
+    })
+ 
     var elems = this._getTargetElements(step.group)
+    var totalAnimTime = step.cascade ? elems.length * step.durationms : step.durationms
+
     step.elems = elems
     if (step.cascade) {
       var startTime = 0
-      var cascadeDuration = elems.length * step.durationms
-
       elems.forEach(function (elem) {
         setTimeout(function () {
           elem.classList.add(step.className)
@@ -254,27 +296,31 @@ Scene.prototype = {
 
         startTime += step.durationms
       })
-      // When cascade ends call callback ( once for all cascade)
-      if (step.callback) {
-        setTimeout(function () {
-          step.callback()
-        }, cascadeDuration)
-      }else {
-        self.runStep(stepIndex + 1)
-      }
+      
     } else {
       // Not cascade
       elems.forEach(function (elem) {
         elem.classList.add(step.className)
       })
-      if (step.callback) {
-        setTimeout(function () {
-          step.callback()
-        }, animTime)
-      }else {
-        self.runStep(stepIndex + 1)
-      }
+      
     }
+    // Execute onEndListeners when step completes
+    step.onEndListeners.forEach(function(endListener) {
+      setTimeout(function () {
+        endListener.bind(step)(step, stepIndex)
+      }, totalAnimTime)
+    })
+
+    //If there are not endListeners run the next step
+    //this will happen asynchronously so
+    // multiple play or playCascade calls will start
+    // at the same time
+    //TODO: onStartListeners is not needed, it will only have 1 item
+    //go back to startCallback, endCallback?
+    if (step.onEndListeners.length === 0  && step.onStartListeners.length === 0) {
+      this.runStep(stepIndex+1)
+    }
+
   },
   _getLastPlayStep: function (index) {
     // Given an index return the last action of type

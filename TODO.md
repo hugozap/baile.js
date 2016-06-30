@@ -23,3 +23,5 @@ function getComputedTranslateY(obj)
     mat = transform.match(/^matrix\((.+)\)$/);
     return mat ? parseFloat(mat[1].split(', ')[5]) : 0;
 }
+
+* Soporte para delay en playCascade
