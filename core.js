@@ -216,11 +216,11 @@ Scene.prototype = {
 
     //for play and playCascade steps:
     
-    //Execute onStartListeners for the step
+    //Execute onStartListeners for the step, use step delay (from wait)
     step.onStartListeners.forEach(function(startListener) {
       setTimeout(function () {
         startListener.bind(step)(step, stepIndex)
-      },0)
+      },step.delay || 0)
     })
  
     var elems = this._getTargetElements(step.group)
