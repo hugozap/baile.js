@@ -96,19 +96,25 @@ Scene.prototype = {
     return this
   },
   // Applies the animation to first elem, wait and then to second...
-  playCascade: function (name, duration, easing) {
+  // @nextElementDelay: (default will be equals to duration) The
+  // time to wait for the next element in the sequence to start being
+  // animated
+  playCascade: function (name, duration, nextElementDelay, easing) {
     var step = {
       type: 'playCascade',
       'cascade': true,
       'group': this.groups[this.currentGroupIndex],
       'name': stringToId(name),
-      'duration': duration,
-      'durationms': this._getMilliseconds(duration),
       'easing': easing || 'linear',
       onStartListeners: [],
       onEndListeners: []
     // TODO: support optional parameters
     }
+
+    step.duration  = duration || 500
+    step.durationms = this._getMilliseconds(step.duration)
+    step.nextElementDelay =  nextElementDelay || step.duration
+    step.nextElementDelayms = this._getMilliseconds(step.nextElementDelay)
 
     this._generateClass(step)
 
@@ -266,7 +272,7 @@ Scene.prototype = {
     // If a wait is found, exit, the previous
     // step should have an attached callback that continues
     if (step.type === 'wait') {
-      throw new Error('wait should be called after a play or playCascade method has been called')
+      throw new Error('wait should be called after a play or playCascade call')
     }
 
     if (step.type === 'clear') {
@@ -311,7 +317,7 @@ Scene.prototype = {
     })
  
     var elems = this._getTargetElements(step.group)
-    var totalAnimTime = step.cascade ? elems.length * step.durationms : step.durationms
+    var totalAnimTime = step.cascade ? elems.length * step.nextElementDelayms : step.durationms
 
     step.elems = elems
     if (step.cascade) {
@@ -321,7 +327,7 @@ Scene.prototype = {
           elem.classList.add(step.className)
         }.bind(this), startTime)
 
-        startTime += step.durationms
+        startTime += step.nextElementDelayms
       })
       
     } else {

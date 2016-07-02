@@ -341,9 +341,57 @@ test('Multiple sequential waits are not supported', function (t){
 })
 
 
-// test('play end callback is called', function(t) {
+test('playCascade with custom delay', function (t){
+	t.plan(2)
+	jsdom.env({
+	  html: `
+		<html>
+			<body>
+				<div class="elem"></div>
+				<div class="elem"></div>
+				<div class="elem"></div>
+			</body>
+		</html>
+	  `,
+	  src: [jquery, Baile],
+	  done: function (err, window) {
+	    var $ = window.$
+	    var document = window.document
+	    var Baile = window.Baile
+	    var now = new Date()
 
-// })
+	    //using 0s for delay will start inmediately the next
+	    //element animation, total time should be approx 1s
+	    var b = Baile().select('.elem')
+	    	.playCascade('testanim','1s','0s')
+	    	.wait(function() {
+	    		var currentTime = new Date()
+	    		var diff = currentTime.getTime() -  now.getTime()
+	    		//For 3 elements more than 3 seconds should have passed
+	    		//(each anim is 1 second)
+	    		var lessThan05s = diff <= 1500
+	    		t.ok(lessThan05s,'cascade total wait should be less than 1.5s')
+	    	})
+	    	.start()
+
+	   	Baile().select('.elem')
+	   		    	.playCascade('testanim','1s','1s')
+	   		    	.wait(function() {
+	   		    		var currentTime = new Date()
+	   		    		var diff = currentTime.getTime() -  now.getTime()
+	   		    		//For 3 elements more than 3 seconds should have passed
+	   		    		//(each anim is 1 second)
+	   		    		var moreThan3Second = diff >= 3000
+	   		    		console.log(diff)
+	   		    		t.ok(moreThan3Second,'cascade total wait should be more than 3s')
+	   		    	})
+	   		    	.start()
+
+	  },
+	  virtualConsole: createVirtualConsole()
+
+	});
+})
 
 // test('Clear removes class from elements', function(t) {
 	
