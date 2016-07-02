@@ -117,9 +117,6 @@ Scene.prototype = {
       cb: cb ,
       delay: delayms
     }
-    console.log('wait step set')
-    console.log('delayms', delay)
-    console.log(step)
     this.animationSteps.push(step)
     return this
   },
@@ -155,7 +152,6 @@ Scene.prototype = {
         //Find closest play step
         do {
           
-          console.log('previousPlayStepIndex:' + previousPlayStepIndex)
           prev = this.animationSteps[previousPlayStepIndex]
           if (['play','playCascade'].indexOf(prev.type) >= 0) {
             break
@@ -248,7 +244,7 @@ Scene.prototype = {
     
     //Execute onStartListeners for the step, use step delay (from wait)
     step.onStartListeners.forEach(function(startListener) {
-      console.log('onStart startListener.delay:',startListener.delay)
+     
       setTimeout(function () {
         startListener.bind(step)(step, stepIndex)
         //startListener.delay was set in setupWaitCallbacks
@@ -279,8 +275,7 @@ Scene.prototype = {
     }
     // Execute onEndListeners when step completes
     step.onEndListeners.forEach(function(endListener) {
-      console.log('onStart endListener.delay:',endListener.delay)
-
+  
       setTimeout(function () {
         endListener.bind(step)(step, stepIndex)
       }, totalAnimTime)
