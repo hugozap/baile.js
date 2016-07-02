@@ -16,23 +16,58 @@ Scene.prototype = {
     this.currentGroupIndex++
     return this
   },
-  play: function (name, duration, easing) {
-    var step = {
-      type: 'play',
-      group: this.groups[this.currentGroupIndex],
-      'name': stringToId(name),
-      'easing': easing,
-      onStartListeners: [],
-      onEndListeners: []
-    // TODO: support optional parameters
+  play: function (name, duration, delay, easing) {
+
+    if (Array.isArray(name)) {
+      //An array of elements was passed. 
+      //The step will have the 'multiple' flag on
+      var animations = name
+      var step = {
+        type: 'play',
+        multiple: true, 
+        animations: animations,
+        group: this.groups[this.currentGroupIndex],
+        onStartListeners: [],
+        onEndListeners: [],
+      }
+
+      //Each animation array object will be expected to have:
+      //[name, duration, delay OPTIONAL, easing OPTIONAL]
+      //calculate duration ms for each anim object
+      animations.forEach(function(anim) {
+        anim.name = anim[0]
+        anim.duration = anim[1]
+        anim.delay = anim[2] || 0
+        anim.easing = anim[3] || 'linear'
+        anim.durationms = this._getMilliseconds(anim.duration),
+        anim.delayms = this._getMilliseconds(anim.delay)
+      })
+      //Because animations are played at the same time, the duration
+      //of the step will be the MAX(durationms + delayms)
+      step.durationms = getMaxOfArray(animations.map(function(a) {
+        return a.durationms + a.delay
+      }))
+      //The css class generated will contain all the animation declarations
+      //So when it's applied, all the animations will run
+      this._generateClass(step)
+      
+    } else {
+      //Single animation specified
+      var step = {
+        type: 'play',
+        group: this.groups[this.currentGroupIndex],
+        'name': stringToId(name),
+        'easing': 'linear',
+        onStartListeners: [],
+        onEndListeners: []
+      // TODO: support optional parameters
+      }
+
+      step.duration= duration || '1s'
+      step.durationms= this._getMilliseconds(step.duration),
+      this._generateClass(step)
+      this.animationSteps.push(step)
     }
-
-    step.duration= duration || '1s'
-    step.durationms= this._getMilliseconds(step.duration),
-
-    this._generateClass(step)
-
-    this.animationSteps.push(step)
 
     return this
   },
@@ -82,20 +117,47 @@ Scene.prototype = {
 
   // Genera la clase css con la regla de animación
   _generateClass: function (step) {
-    var className = step.name + getNewId()
-    // Modify step, set class
-    step.className = className
-    var duration = step.durationms + 'ms'
-    var ease = step.easing
-    var direction = 'forwards'
-    var cssRule = [step.name, duration, ease, direction].join(' ')
-    var cssClassName = '.' + className
-    var cssObj = {
+    if (step.multiple) {
+      //When the user passes an array to the play call
+      //multiple animations must be run on the elements
+      //CSS supports this using the animation property as:
+      //animation: first animation config, second animation config;
+      var className = step.animations.reduce(function(prev,cur) {
+        return prev.name+'_'+cur.name
+      })
+      // Modify step, set class
+      step.className = className + getNewId()
+      //Generate the list of animation declarations
+      var animationDeclarations = []
+      step.animations.forEach(function(anim) {
+        var direction = 'forwards'
+        animationDeclarations.push([anim.name, anim.durationms + 'ms', anim.delayms + 'ms', anim.easing, direction].join(' '))
+      })
+      var cssRule = animationDeclarations.join(',')
+      var cssClassName = '.' + className
+      var cssObj = {}
+      cssObj[cssClassName] = {'animation': cssRule, 'opacity': 1}
+      var css = restyle(cssObj)
+      this.cssClassStack.push(className)
+    } else {
+      //Single animation
+      var className = step.name + getNewId()
+      // Modify step, set class
+      step.className = className
+      var duration = step.durationms + 'ms'
+      var delay = step.delayms + 'ms'
+      var ease = step.easing
+      var direction = 'forwards'
+      var cssRule = [step.name, duration, delay, ease, direction].join(' ')
+      var cssClassName = '.' + className
+      var cssObj = {
+      }
+
+      cssObj[cssClassName] = {'animation': cssRule, 'opacity': 1}
+      var css = restyle(cssObj)
+      this.cssClassStack.push(className)
     }
 
-    cssObj[cssClassName] = {'animation': cssRule, 'opacity': 1}
-    var css = restyle(cssObj)
-    this.cssClassStack.push(className)
   },
 
   /* cb[optional]: callback executed when the wait period is over
@@ -182,7 +244,7 @@ Scene.prototype = {
             // Run next animation
             self.runStep(prevStep.nextStepIndex)
           }
-          //Save the delay so we can retrieve it when the start callbacks
+          //Save the wait specified delay so we can retrieve it when the start callbacks
           //are executed
           c.delay = waitStep.delay
           return c
