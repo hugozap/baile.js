@@ -393,6 +393,6 @@ test('playCascade with custom delay', function (t){
 	});
 })
 
-// test('Clear removes class from elements', function(t) {
-	
-// })
+test('play without duration parameter defaults to 1s',function(t) {
+
+})

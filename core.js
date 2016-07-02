@@ -21,13 +21,14 @@ Scene.prototype = {
       type: 'play',
       group: this.groups[this.currentGroupIndex],
       'name': stringToId(name),
-      'duration': duration,
-      'durationms': this._getMilliseconds(duration),
       'easing': easing,
       onStartListeners: [],
       onEndListeners: []
     // TODO: support optional parameters
     }
+
+    step.duration= duration || '1s'
+    step.durationms= this._getMilliseconds(step.duration),
 
     this._generateClass(step)
 
