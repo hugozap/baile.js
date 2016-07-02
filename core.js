@@ -111,6 +111,9 @@ Scene.prototype = {
       cb: cb ,
       delay: delayms
     }
+    console.log('wait step set')
+    console.log('delayms', delay)
+    console.log(step)
     this.animationSteps.push(step)
     return this
   },
@@ -141,7 +144,23 @@ Scene.prototype = {
 
         // TODO: validar que exista una animacion previa
         // TODO: soportar varios play antes de wait
-        var prev = this.animationSteps[i - 1]
+        var prev; //previous play step
+        var previousPlayStepIndex = i-1
+        //Find closest play step
+        do {
+          
+          console.log('previousPlayStepIndex:' + previousPlayStepIndex)
+          prev = this.animationSteps[previousPlayStepIndex]
+          if (['play','playCascade'].indexOf(prev.type) >= 0) {
+            break
+          }
+          if (prev.type === 'wait') {
+            throw new Error('Only one wait call is supported between play/playCascade calls')
+          }
+          previousPlayStepIndex--
+
+        }while ( previousPlayStepIndex >= 0)
+
         prev.nextStepIndex = i + 1
         /* If the wait step has a delay set, then 
            we should not wait until the last step has
@@ -152,7 +171,7 @@ Scene.prototype = {
         //The callback called onstart or onend 
         //for the previous step
         var pcallback = (function (waitStep, prevStep) {
-          return function() {
+          var c =  function() {
             //Run wait user callback
             if (waitStep.cb) {
               waitStep.cb()
@@ -160,10 +179,15 @@ Scene.prototype = {
             // Run next animation
             self.runStep(prevStep.nextStepIndex)
           }
+          //Save the delay so we can retrieve it when the start callbacks
+          //are executed
+          c.delay = waitStep.delay
+          return c
 
         })(currentStep, prev)
 
-        if (currentStep.delayms) {
+        if (currentStep.delay) {
+          console.log('adding callback to previous onStarTListeners list')
           //add to listeners executed on start
           prev.onStartListeners.push(pcallback)
         } else {
@@ -182,7 +206,7 @@ Scene.prototype = {
     // If a wait is found, exit, the previous
     // step should have an attached callback that continues
     if (step.type === 'wait') {
-      throw new Error('wait should be called after a play or playCascade method has been called')
+      throw new Error('wait should be called after a play or playCascade call')
     }
 
     if (step.type === 'clear') {
@@ -218,9 +242,12 @@ Scene.prototype = {
     
     //Execute onStartListeners for the step, use step delay (from wait)
     step.onStartListeners.forEach(function(startListener) {
+      console.log('onStart startListener.delay:',startListener.delay)
       setTimeout(function () {
         startListener.bind(step)(step, stepIndex)
-      },step.delay || 0)
+        //startListener.delay was set in setupWaitCallbacks
+        //it was copied from the wait step delay
+      },startListener.delay || 0)
     })
  
     var elems = this._getTargetElements(step.group)
@@ -246,6 +273,8 @@ Scene.prototype = {
     }
     // Execute onEndListeners when step completes
     step.onEndListeners.forEach(function(endListener) {
+      console.log('onStart endListener.delay:',endListener.delay)
+
       setTimeout(function () {
         endListener.bind(step)(step, stepIndex)
       }, totalAnimTime)

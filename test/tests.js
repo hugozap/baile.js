@@ -267,13 +267,79 @@ test('Multiple wait callbacks get executed', function(t) {
 	});
 })
 
-// test('play end callback is called', function(t) {
+test('wait with custom delay called before cascade finishes', function (t){
+	t.plan(1)
+	jsdom.env({
+	  html: `
+		<html>
+			<body>
+				<div class="elem"></div>
+				<div class="elem"></div>
+				<div class="elem"></div>
+			</body>
+		</html>
+	  `,
+	  src: [jquery, Baile],
+	  done: function (err, window) {
+	    var $ = window.$
+	    var document = window.document
+	    var Baile = window.Baile
+	    var now = new Date()
+	    var cascadeFinished = false
 
-// })
+	    var b = Baile().select('.elem')
+	    	.playCascade('testanim','1s')
+	    	.wait(function() {
+	    		var currentTime = new Date()
+	    		var diff = currentTime.getTime() -  now.getTime()
+	    		//total animation time = 1s x 3
+	    		var lessThan3Seconds = diff <= (1000 * 3)
+	    		console.log('wait runs, diff:', diff)
+	    			    		//t.message(diff)
+	    		t.ok(lessThan3Seconds,'wait ends before cascade')
+	    	}, '0.5s')
+	    	.start()
+	  }
+	});
+})
 
-// test('playCascade end callback is called', function(t) {
 
-// })
+test('Multiple sequential waits are not supported', function (t){
+	t.plan(1)
+	jsdom.env({
+	  html: `
+		<html>
+			<body>
+				<div class="elem"></div>
+				<div class="elem"></div>
+				<div class="elem"></div>
+			</body>
+		</html>
+	  `,
+	  src: [jquery, Baile],
+	  done: function (err, window) {
+	    var $ = window.$
+	    var document = window.document
+	    var Baile = window.Baile
+	    try{ 
+	    	var b = Baile().select('.elem')
+    		.playCascade('testanim','1s')
+    		.wait(function() {
+    			t.ok('first wait executed')
+    		})
+    		.wait(function() {
+    			t.ok('second wait executed')
+    		})
+    		.start()
+	    }catch(e) {
+	    	console.log(e)
+	    	t.equals(e.message, 'Only one wait call is supported between play/playCascade calls')
+	    }
+
+	  }
+	});
+})
+
 
 // test('play end callback is called', function(t) {
 
