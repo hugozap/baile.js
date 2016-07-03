@@ -18,10 +18,13 @@ Scene.prototype = {
   },
   play: function (name, duration, delay, easing) {
 
-    if (Array.isArray(name)) {
+    if (Array.isArray(arguments[0])) {
       //An array of elements was passed. 
       //The step will have the 'multiple' flag on
-      var animations = name
+      var animations = []
+      for (var i = 0; i < arguments.length; i++) {
+        animations.push(arguments[i])
+      }
       var step = {
         type: 'play',
         multiple: true, 
@@ -31,17 +34,20 @@ Scene.prototype = {
         onEndListeners: [],
       }
 
+      console.log('array passed:' + step.animations)
+
       //Each animation array object will be expected to have:
       //[name, duration, delay OPTIONAL, easing OPTIONAL]
       //calculate duration ms for each anim object
-      animations.forEach(function(anim) {
+      step.animations.forEach(function(anim) {
+        console.log('anim:'+JSON.stringify(anim))
         anim.name = anim[0]
         anim.duration = anim[1]
         anim.delay = anim[2] || 0
         anim.easing = anim[3] || 'linear'
         anim.durationms = this._getMilliseconds(anim.duration),
         anim.delayms = this._getMilliseconds(anim.delay)
-      })
+      }.bind(this))
       //Because animations are played at the same time, the duration
       //of the step will be the MAX(durationms + delayms)
       step.durationms = getMaxOfArray(animations.map(function(a) {
@@ -50,6 +56,7 @@ Scene.prototype = {
       //The css class generated will contain all the animation declarations
       //So when it's applied, all the animations will run
       this._generateClass(step)
+      this.animationSteps.push(step)
       
     } else {
       //Single animation specified

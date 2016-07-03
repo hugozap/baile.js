@@ -478,9 +478,6 @@ test('play supports an array of declarations', function (t){
 	    		t.end()
 	    	})
 	    	.start()
-
-	    setTimeout(function(){
-	    },200)
 	  },
 	  virtualConsole: createVirtualConsole()
 
@@ -531,4 +528,8 @@ test('playCascade supports an array of declarations', function (t){
 	  virtualConsole: createVirtualConsole()
 
 	});
+})
+
+test('delay argument for play supported', function(t) {
+
 })
