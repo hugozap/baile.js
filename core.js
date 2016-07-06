@@ -16,7 +16,7 @@ Scene.prototype = {
     this.currentGroupIndex++
     return this
   },
-  play: function (name, duration, delay, easing) {
+  play: function (name, duration, delay, timingFunction) {
 
     if (Array.isArray(arguments[0])) {
       //An array of elements was passed. 
@@ -37,14 +37,14 @@ Scene.prototype = {
       console.log('array passed:' + step.animations)
 
       //Each animation array object will be expected to have:
-      //[name, duration, delay OPTIONAL, easing OPTIONAL]
+      //[name, duration, delay OPTIONAL, timingFunction OPTIONAL]
       //calculate duration ms for each anim object
       step.animations.forEach(function(anim) {
         console.log('anim:'+JSON.stringify(anim))
         anim.name = anim[0]
         anim.duration = anim[1]
         anim.delay = anim[2] || 0
-        anim.easing = anim[3] || 'linear'
+        anim.timingFunction = anim[3] || 'linear'
         anim.durationms = this._getMilliseconds(anim.duration),
         anim.delayms = this._getMilliseconds(anim.delay)
       }.bind(this))
@@ -64,7 +64,7 @@ Scene.prototype = {
         type: 'play',
         group: this.groups[this.currentGroupIndex],
         'name': stringToId(name),
-        'easing': 'linear',
+        'timingFunction': 'linear',
         onStartListeners: [],
         onEndListeners: []
       // TODO: support optional parameters
@@ -82,13 +82,13 @@ Scene.prototype = {
   // @nextElementDelay: (default will be equals to duration) The
   // time to wait for the next element in the sequence to start being
   // animated
-  playCascade: function (name, duration, nextElementDelay, easing) {
+  playCascade: function (name, duration, nextElementDelay, timingFunction) {
     var step = {
       type: 'playCascade',
       'cascade': true,
       'group': this.groups[this.currentGroupIndex],
       'name': stringToId(name),
-      'easing': easing || 'linear',
+      'timingFunction': timingFunction || 'linear',
       onStartListeners: [],
       onEndListeners: []
     // TODO: support optional parameters
@@ -138,7 +138,7 @@ Scene.prototype = {
       var animationDeclarations = []
       step.animations.forEach(function(anim) {
         var direction = 'forwards'
-        animationDeclarations.push([anim.name, anim.durationms + 'ms', anim.delayms + 'ms', anim.easing, direction].join(' '))
+        animationDeclarations.push([anim.name, anim.durationms + 'ms', anim.delayms + 'ms', anim.timingFunction, direction].join(' '))
       })
       var cssRule = animationDeclarations.join(',')
       var cssClassName = '.' + className
@@ -153,7 +153,7 @@ Scene.prototype = {
       step.className = className
       var duration = step.durationms + 'ms'
       var delay = step.delayms + 'ms'
-      var ease = step.easing
+      var ease = step.timingFunction
       var direction = 'forwards'
       var cssRule = [step.name, duration, delay, ease, direction].join(' ')
       var cssClassName = '.' + className
