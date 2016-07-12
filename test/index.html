@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tests</title>
+	<script src="baile.js"></script>
+	<link rel="stylesheet" href="../demos/animate.css">
+</head>
+<body>
+	
+	<div class="test-basic">
+		<button onclick="basicTest()">Run</button>
+		<div class="items">
+			<div>A</div>
+			<div>B</div>
+			<div>C</div>
+		</div>
+	</div>
+
+	<script>
+		var $ = document.querySelector
+		function basicTest() {
+			Baile().select('.test-basic .items>div')
+			.play('jello','2s')
+			.start()
+		}
+	</script>
+</body>
+</html>
