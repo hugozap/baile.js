@@ -63,7 +63,7 @@ function getMaxOfArray(numArray) {
 if (!Array.prototype.reduce) {
   Array.prototype.reduce = function(callback /*, initialValue*/) {
     'use strict';
-    if (this == null) {
+    if (this === null) {
       throw new TypeError('Array.prototype.reduce called on null or undefined');
     }
     if (typeof callback !== 'function') {
@@ -88,4 +88,11 @@ if (!Array.prototype.reduce) {
     }
     return value;
   };
+}
+
+function getMilliseconds(value) {
+  if (typeof value === 'number')
+    return value
+  // let timeparse handle the conversion to ms
+  return parse(value)
 }

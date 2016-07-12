@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/baile.js",
   "scripts": {
-    "test": "npm run build && tape test/* | faucet",
+    "test": "npm run build && tape test/tests.js | faucet",
     "build": "node ./build.js"
   },
   "author": "@hugozap",

@@ -16,65 +16,65 @@ Scene.prototype = {
     this.currentGroupIndex++
     return this
   },
-  play: function (name, duration, delay, timingFunction) {
+  /*
+    Adds an animation to the queue, 
+    name and duration can be passed to the function or a custom object
+    with the following properties:
+    - name
+    - duration
+    - delay
+    - timingFunction
+    - steps
 
-    if (Array.isArray(arguments[0])) {
-      //An array of elements was passed. 
-      //The step will have the 'multiple' flag on
-      var animations = []
-      for (var i = 0; i < arguments.length; i++) {
-        animations.push(arguments[i])
-      }
-      var step = {
-        type: 'play',
-        multiple: true, 
-        animations: animations,
-        group: this.groups[this.currentGroupIndex],
-        onStartListeners: [],
-        onEndListeners: [],
-      }
-
-      console.log('array passed:' + step.animations)
-
-      //Each animation array object will be expected to have:
-      //[name, duration, delay OPTIONAL, timingFunction OPTIONAL]
-      //calculate duration ms for each anim object
-      step.animations.forEach(function(anim) {
-        console.log('anim:'+JSON.stringify(anim))
-        anim.name = anim[0]
-        anim.duration = anim[1]
-        anim.delay = anim[2] || 0
-        anim.timingFunction = anim[3] || 'linear'
-        anim.durationms = this._getMilliseconds(anim.duration),
-        anim.delayms = this._getMilliseconds(anim.delay)
-      }.bind(this))
-      //Because animations are played at the same time, the duration
-      //of the step will be the MAX(durationms + delayms)
-      step.durationms = getMaxOfArray(animations.map(function(a) {
-        return a.durationms + a.delay
-      }))
-      //The css class generated will contain all the animation declarations
-      //So when it's applied, all the animations will run
-      this._generateClass(step)
-      this.animationSteps.push(step)
-      
-    } else {
-      //Single animation specified
-      var step = {
-        type: 'play',
-        group: this.groups[this.currentGroupIndex],
-        'name': stringToId(name),
-        'timingFunction': 'linear',
-        onStartListeners: [],
-        onEndListeners: []
-      // TODO: support optional parameters
-      }
-
-      step.duration= duration || '1s'
-      step.durationms= this._getMilliseconds(step.duration),
-      this._generateClass(step)
-      this.animationSteps.push(step)
+    Multiple animations can be passed as arguments
+  
+      b.play({
+        'name':'...',
+        'duration': '1s'
+        ...
+      },
+      {
+        'name':'...',
+        'duration': '2s'
+        ...
+      })
+  
+   */
+  play: function () {
+    var step
+    var animations = []
+    step = {
+      type: 'play',
+      animations: animations,
+      group: this.groups[this.currentGroupIndex],
+      onStartListeners: [],
+      onEndListeners: []
     }
+
+    if (typeof arguments[0] === 'string') {
+      // play was called with single arguments
+      // play('name', '1s', '1s')
+      var objParam = {
+        'name': arguments[0],
+        'duration': arguments[1],
+        'delay': arguments[2]
+      }
+      animations.push(getAnimationArguments(objParam))
+    } else {
+      for (var i = 0; i < arguments.length; i++) {
+        animations.push(getAnimationArguments(arguments[i]))
+      }
+    }
+
+    // Because animations are played at the same time, the duration
+    // of the step will be the MAX(durationms + delayms)
+    step.durationms = getMaxOfArray(step.animations.map(function (a) {
+      return a.durationms + a.delayms
+    }))
+    // The css class generated will contain all the animation declarations
+    // So when it's applied, all the animations will run
+    this._generateClass(step)
+    this.animationSteps.push(step)
 
     return this
   },
@@ -82,25 +82,43 @@ Scene.prototype = {
   // @nextElementDelay: (default will be equals to duration) The
   // time to wait for the next element in the sequence to start being
   // animated
-  playCascade: function (name, duration, nextElementDelay, timingFunction) {
-    var step = {
+  playCascade: function () {
+    var step, animations = []
+    step = {
       type: 'playCascade',
-      'cascade': true,
-      'group': this.groups[this.currentGroupIndex],
-      'name': stringToId(name),
-      'timingFunction': timingFunction || 'linear',
+      animations: animations,
+      group: this.groups[this.currentGroupIndex],
       onStartListeners: [],
       onEndListeners: []
-    // TODO: support optional parameters
     }
 
-    step.duration  = duration || 500
-    step.durationms = this._getMilliseconds(step.duration)
-    step.nextElementDelay =  nextElementDelay || step.duration
-    step.nextElementDelayms = this._getMilliseconds(step.nextElementDelay)
+    if (typeof arguments[0] === 'string') {
+      // play was called with single arguments
+      // play('name', '1s', '1s')
+      var objParam = {
+        'name': arguments[0],
+        'duration': arguments[1],
+        'delay': arguments[2]
+      }
+      animations.push(getAnimationArguments(objParam))
+    } else {
+      for (var i = 0; i < arguments.length; i++) {
+        animations.push(getAnimationArguments(arguments[i]))
+      }
+    }
 
+    for (var i = 0; i < arguments.length; i++) {
+      animations.push(getAnimationArguments(arguments[i]))
+    }
+
+    // Because animations are played at the same time, the duration
+    // of the step will be the MAX(durationms + delayms)
+    step.durationms = getMaxOfArray(step.animations.map(function (a) {
+      return a.durationms + a.delayms
+    }))
+    // The css class generated will contain all the animation declarations
+    // So when it's applied, all the animations will run
     this._generateClass(step)
-
     this.animationSteps.push(step)
 
     return this
@@ -115,56 +133,25 @@ Scene.prototype = {
 
     return this
   },
-  _getMilliseconds: function (value) {
-    if (typeof value == 'number')
-      return value
-    // let timeparse handle the conversion to ms
-    return parse(value)
-  },
-
   // Genera la clase css con la regla de animación
   _generateClass: function (step) {
-    if (step.multiple) {
-      //When the user passes an array to the play call
-      //multiple animations must be run on the elements
-      //CSS supports this using the animation property as:
-      //animation: first animation config, second animation config;
-      var className = step.animations.reduce(function(prev,cur) {
-        return prev.name+'_'+cur.name
-      })
-      // Modify step, set class
-      step.className = className + getNewId()
-      //Generate the list of animation declarations
-      var animationDeclarations = []
-      step.animations.forEach(function(anim) {
-        var direction = 'forwards'
-        animationDeclarations.push([anim.name, anim.durationms + 'ms', anim.delayms + 'ms', anim.timingFunction, direction].join(' '))
-      })
-      var cssRule = animationDeclarations.join(',')
-      var cssClassName = '.' + className
-      var cssObj = {}
-      cssObj[cssClassName] = {'animation': cssRule, 'opacity': 1}
-      var css = restyle(cssObj)
-      this.cssClassStack.push(className)
-    } else {
-      //Single animation
-      var className = step.name + getNewId()
-      // Modify step, set class
-      step.className = className
-      var duration = step.durationms + 'ms'
-      var delay = step.delayms + 'ms'
-      var ease = step.timingFunction
-      var direction = 'forwards'
-      var cssRule = [step.name, duration, delay, ease, direction].join(' ')
-      var cssClassName = '.' + className
-      var cssObj = {
-      }
-
-      cssObj[cssClassName] = {'animation': cssRule, 'opacity': 1}
-      var css = restyle(cssObj)
-      this.cssClassStack.push(className)
-    }
-
+    var className = step.animations.reduce(function (prev, cur) {
+      return  (prev.name?prev.name:'') + '_' + cur.name
+    },{})
+    // Modify step, set class
+    step.className = className + getNewId()
+    // Generate the list of animation declarations
+    var animationDeclarations = []
+    step.animations.forEach(function (anim) {
+      var steps = anim.steps ? 'steps(' + anim.steps + ')' : ''
+      animationDeclarations.push([anim.name, anim.durationms + 'ms', anim.delayms + 'ms', steps, anim.timingFunction, anim.direction].join(' '))
+    })
+    var cssRule = animationDeclarations.join(',')
+    var cssClassName = '.' + step.className
+    var cssObj = {}
+    cssObj[cssClassName] = {'animation': cssRule, 'opacity': 1}
+    var css = restyle(cssObj)
+    this.cssClassStack.push(className)
   },
 
   /* cb[optional]: callback executed when the wait period is over
@@ -172,19 +159,18 @@ Scene.prototype = {
      , by default delay === last step duration
  */
   wait: function (cb, delay) {
-    //only delay was set as argument
+    // only delay was set as argument
 
     var delayms = null
-    if (['string','number'].indexOf(typeof cb) > -1) {
-      delayms = this._getMilliseconds(cb)
-    } else if (['string','number'].indexOf(typeof delay) > -1) {
-
-      delayms = this._getMilliseconds(delay)
+    if (['string', 'number'].indexOf(typeof cb) > -1) {
+      delayms = getMilliseconds(cb)
+    } else if (['string', 'number'].indexOf(typeof delay) > -1) {
+      delayms = getMilliseconds(delay)
     }
-    var cb = typeof cb === 'function' ? cb:  new Function()
+    var cb = typeof cb === 'function' ? cb : new Function()
     var step = {
       type: 'wait',
-      cb: cb ,
+      cb: cb,
       delay: delayms
     }
     this.animationSteps.push(step)
@@ -217,21 +203,19 @@ Scene.prototype = {
 
         // TODO: validar que exista una animacion previa
         // TODO: soportar varios play antes de wait
-        var prev; //previous play step
-        var previousPlayStepIndex = i-1
-        //Find closest play step
+        var prev // previous play step
+        var previousPlayStepIndex = i - 1
+        // Find closest play step
         do {
-          
           prev = this.animationSteps[previousPlayStepIndex]
-          if (['play','playCascade'].indexOf(prev.type) >= 0) {
+          if (['play', 'playCascade'].indexOf(prev.type) >= 0) {
             break
           }
           if (prev.type === 'wait') {
             throw new Error('Only one wait call is supported between play/playCascade calls')
           }
           previousPlayStepIndex--
-
-        }while ( previousPlayStepIndex >= 0)
+        } while (previousPlayStepIndex >= 0)
 
         prev.nextStepIndex = i + 1
         /* If the wait step has a delay set, then 
@@ -239,31 +223,30 @@ Scene.prototype = {
            finished. We should instead wait delayms from the moment
            the previous step starts
         */
-        
-        //The callback called onstart or onend 
-        //for the previous step
+
+        // The callback called onstart or onend 
+        // for the previous step
         var pcallback = (function (waitStep, prevStep) {
-          var c =  function() {
-            //Run wait user callback
+          var c = function () {
+            // Run wait user callback
             if (waitStep.cb) {
               waitStep.cb()
             }
             // Run next animation
             self.runStep(prevStep.nextStepIndex)
           }
-          //Save the wait specified delay so we can retrieve it when the start callbacks
-          //are executed
+          // Save the wait specified delay so we can retrieve it when the start callbacks
+          // are executed
           c.delay = waitStep.delay
           return c
-
         })(currentStep, prev)
 
         if (currentStep.delay) {
           console.log('adding callback to previous onStarTListeners list')
-          //add to listeners executed on start
+          // add to listeners executed on start
           prev.onStartListeners.push(pcallback)
         } else {
-          //add to listeners executed on end
+          // add to listeners executed on end
           prev.onEndListeners.push(pcallback)
         }
       }
@@ -310,23 +293,22 @@ Scene.prototype = {
       return
     }
 
-    //for play and playCascade steps:
-    
-    //Execute onStartListeners for the step, use step delay (from wait)
-    step.onStartListeners.forEach(function(startListener) {
-     
+    // for play and playCascade steps:
+
+    // Execute onStartListeners for the step, use step delay (from wait)
+    step.onStartListeners.forEach(function (startListener) {
       setTimeout(function () {
         startListener.bind(step)(step, stepIndex)
-        //startListener.delay was set in setupWaitCallbacks
-        //it was copied from the wait step delay
-      },startListener.delay || 0)
+      // startListener.delay was set in setupWaitCallbacks
+      // it was copied from the wait step delay
+      }, startListener.delay || 0)
     })
- 
+
     var elems = this._getTargetElements(step.group)
     var totalAnimTime = step.cascade ? elems.length * step.nextElementDelayms : step.durationms
 
     step.elems = elems
-    if (step.cascade) {
+    if (step.type === 'playCascade') {
       var startTime = 0
       elems.forEach(function (elem) {
         setTimeout(function () {
@@ -335,32 +317,28 @@ Scene.prototype = {
 
         startTime += step.nextElementDelayms
       })
-      
     } else {
       // Not cascade
       elems.forEach(function (elem) {
         elem.classList.add(step.className)
       })
-      
     }
     // Execute onEndListeners when step completes
-    step.onEndListeners.forEach(function(endListener) {
-  
+    step.onEndListeners.forEach(function (endListener) {
       setTimeout(function () {
         endListener.bind(step)(step, stepIndex)
       }, totalAnimTime)
     })
 
-    //If there are not start/endListeners run the next step
-    //this will happen asynchronously so
+    // If there are not start/endListeners run the next step
+    // this will happen asynchronously so
     // multiple play or playCascade calls will start
     // at the same time
-    //TODO: onStartListeners is not needed, it will only have 1 item
-    //go back to startCallback, endCallback?
-    if (step.onEndListeners.length === 0  && step.onStartListeners.length === 0) {
-      this.runStep(stepIndex+1)
+    // TODO: onStartListeners is not needed, it will only have 1 item
+    // go back to startCallback, endCallback?
+    if (step.onEndListeners.length === 0 && step.onStartListeners.length === 0) {
+      this.runStep(stepIndex + 1)
     }
-
   },
   _getLastPlayStep: function (index) {
     // Given an index return the last action of type
@@ -389,6 +367,30 @@ Scene.prototype = {
       // It's just one element return it wrapped as array
       return [group]
     }
+  }
+}
+
+/* Returns an object with properties similar to CSS animation 
+  from the parameter given
+  TODO: support strings with similar syntax to CSS animation property
+*/
+function getAnimationArguments (param) {
+  if (typeof param === 'object') {
+    return {
+      name: stringToId(param.name),
+      steps: param.steps,
+      direction: param.direction || 'forwards',
+      timingFunction: param.timingFunction || 'linear',
+      durationms: getMilliseconds(param.duration || 1000),
+      delayms: getMilliseconds(param.delay || 0),
+      /* TODO: rename
+         this parameter applies only to playCascade, it refers to
+         the time between animations in the cascade */
+      nextElementDelay: param.nextElementDelay || param.duration,
+      nextElementDelayms: getMilliseconds(param.nextElementDelayms || param.duration)
+    }
+  } else {
+    throw new Error('Animation details must be an object')
   }
 }
 
